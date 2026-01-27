@@ -7,10 +7,18 @@
     // Check if the viewport width is below a threshold that indicates a mobile/tablet device
     const MAX_MOBILE_WIDTH = 768; // pixels
     
+    // Check if we've already attempted to block (prevent infinite reload loop)
+    if (sessionStorage.getItem('mobile_block_attempted')) {
+        return; // Don't check again in this session
+    }
+    
     function checkScreenSize() {
         const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
         
         if (viewportWidth < MAX_MOBILE_WIDTH) {
+            // Mark that we've attempted to block
+            sessionStorage.setItem('mobile_block_attempted', 'true');
+            
             // Send an AJAX request to set the session flag
             fetch('set_mobile_block.php', {
                 method: 'POST',

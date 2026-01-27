@@ -25,9 +25,7 @@ function is_mobile() {
 // This flag is set by JavaScript in login.js if the viewport is small.
 // --------------------------------------------------------------------------------
 if (isset($_SESSION['access_blocked_by_screen_size']) && $_SESSION['access_blocked_by_screen_size'] === true) {
-    // Unset the session flag immediately after checking to prevent blocking the next non-mobile user
-    unset($_SESSION['access_blocked_by_screen_size']); 
-    
+    // Keep the session flag set to maintain the block for this session
     // Fall through to the restriction message block below
     $is_blocked = true;
 
@@ -79,7 +77,7 @@ if ($is_blocked) {
         <body>
             <div class="message">
                 <h2>Access Restricted</h2>
-                <p>Please login in computer.</p>
+                <p>Please login from a computer.</p>
                 <small>This portal requires a desktop or large tablet screen for proper viewing.</small>
             </div>
         </body>
@@ -175,8 +173,7 @@ if (isset($_COOKIE['remembered_email'])) {
                         id="password-field" 
                         placeholder=" Password" 
                         required 
-                        autocomplete="current-password"
-                        onpaste="return false;" oncopy="return false;"    >
+                        autocomplete="current-password">
                     <span class="toggle-password">
                         👁️
                     </span>

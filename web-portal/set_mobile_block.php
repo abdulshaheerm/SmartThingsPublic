@@ -7,6 +7,9 @@
 
 session_start();
 
+// Set JSON content type header
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['block_access'])) {
     $_SESSION['access_blocked_by_screen_size'] = true;
     http_response_code(200);

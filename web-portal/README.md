@@ -23,8 +23,8 @@ Users attempting to access the portal from mobile devices or small screens will 
 - HttpOnly and Secure cookie flags
 - Content Security Policy headers
 - X-Frame-Options and X-Content-Type-Options headers
-- Password field restrictions (no copy/paste)
 - Input validation and sanitization
+- Password managers supported (paste enabled)
 
 ## Files
 
@@ -96,7 +96,7 @@ Replace the following with your actual brand assets:
 3. Add rate limiting for login attempts
 4. Enable secure session configuration in `php.ini`
 5. Regularly update PHP and dependencies
-6. Implement CSRF protection for forms
+6. Implement CSRF protection for forms (not yet implemented)
 7. Add logging for security events
 
 ## License
