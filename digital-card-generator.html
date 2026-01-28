@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Card Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .left-panel, .right-panel {
+            padding: 20px;
+        }
+
+        .left-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .left-panel h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .photo-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .photo-upload:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+
+        .photo-upload input[type="file"] {
+            display: none;
+        }
+
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 4px solid #667eea;
+            display: none;
+        }
+
+        .photo-preview.show {
+            display: block;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 20px;
+        }
+
+        .right-panel h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        .card-preview {
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            color: white;
+            position: relative;
+        }
+
+        .card-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            display: block;
+            border: 4px solid white;
+            background: white;
+        }
+
+        .card-info {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .card-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .card-title {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .card-details {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-detail-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .card-detail-item:not(:last-child) {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-detail-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .download-btn {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .placeholder-text {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .right-panel {
+                position: relative;
+                top: 0;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        /* Icon styles */
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Digital Card Generator</h1>
+            <p>Create professional digital business cards in seconds</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Left Panel: Data Input Form -->
+            <div class="left-panel">
+                <h2>Card Information</h2>
+
+                <div class="form-group">
+                    <label for="photo-upload">Photo Upload</label>
+                    <div class="photo-upload" onclick="document.getElementById('photo-input').click()" 
+                         tabindex="0" 
+                         onkeypress="if(event.key==='Enter'||event.key===' ')document.getElementById('photo-input').click()"
+                         role="button"
+                         aria-label="Upload profile photo">
+                        <input type="file" id="photo-input" accept="image/*">
+                        <img id="photo-preview" class="photo-preview" alt="Profile photo preview">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">Click to upload photo</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="employee-name">Employee Name *</label>
+                    <input type="text" id="employee-name" placeholder="Enter full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="job-title">Job Title *</label>
+                    <input type="text" id="job-title" placeholder="Enter job title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone-number">Phone Number *</label>
+                    <input type="tel" id="phone-number" placeholder="+966 XX XXX XXXX" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="whatsapp">WhatsApp Number</label>
+                    <input type="tel" id="whatsapp" placeholder="+966 XX XXX XXXX">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" placeholder="email@example.com" required>
+                </div>
+            </div>
+
+            <!-- Right Panel: Preview & Actions -->
+            <div class="right-panel">
+                <h2>Preview</h2>
+
+                <div class="card-preview">
+                    <img id="card-photo" class="card-photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect fill='%23ddd' width='120' height='120'/%3E%3Ctext fill='%23999' font-family='Arial' font-size='14' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3ENo Photo%3C/text%3E%3C/svg%3E" alt="Profile Photo">
+
+                    <div class="card-info">
+                        <div class="card-name" id="card-name">
+                            <span class="placeholder-text">Your Name</span>
+                        </div>
+                        <div class="card-title" id="card-title">
+                            <span class="placeholder-text">Job Title</span>
+                        </div>
+                    </div>
+
+                    <div class="card-details">
+                        <div class="card-detail-item">
+                            <span class="icon">📞</span>
+                            <span id="card-phone" class="placeholder-text">Phone Number</span>
+                        </div>
+                        <div class="card-detail-item">
+                            <span class="icon">💬</span>
+                            <span id="card-whatsapp" class="placeholder-text">WhatsApp</span>
+                        </div>
+                        <div class="card-detail-item">
+                            <span class="icon">✉️</span>
+                            <span id="card-email" class="placeholder-text">Email</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="action-btn" id="call-btn" onclick="handleCall()">
+                            <span>📞</span> Call
+                        </button>
+                        <button class="action-btn" id="email-btn" onclick="handleEmail()">
+                            <span>✉️</span> Email
+                        </button>
+                        <button class="action-btn" id="whatsapp-btn" onclick="handleWhatsApp()">
+                            <span>💬</span> WhatsApp
+                        </button>
+                        <button class="action-btn" id="website-btn" onclick="handleWebsite()">
+                            <span>🌐</span> Website
+                        </button>
+                    </div>
+                </div>
+
+                <button class="download-btn" onclick="downloadVCard()">
+                    <span>⬇️</span> Download vCard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Card data storage
+        let cardData = {
+            name: '',
+            title: '',
+            phone: '',
+            whatsapp: '',
+            email: '',
+            photo: ''
+        };
+
+        // Photo upload handler
+        document.getElementById('photo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select a valid image file.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('Image file is too large. Please select an image smaller than 5MB.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const photoPreview = document.getElementById('photo-preview');
+                    const cardPhoto = document.getElementById('card-photo');
+                    
+                    photoPreview.src = event.target.result;
+                    photoPreview.classList.add('show');
+                    cardPhoto.src = event.target.result;
+                    cardData.photo = event.target.result;
+                };
+                reader.onerror = function() {
+                    alert('Error reading file. Please try again.');
+                    e.target.value = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Real-time update handlers
+        document.getElementById('employee-name').addEventListener('input', function(e) {
+            cardData.name = e.target.value;
+            const cardName = document.getElementById('card-name');
+            if (e.target.value) {
+                cardName.textContent = e.target.value;
+                cardName.className = '';
+            } else {
+                cardName.innerHTML = '<span class="placeholder-text">Your Name</span>';
+            }
+        });
+
+        document.getElementById('job-title').addEventListener('input', function(e) {
+            cardData.title = e.target.value;
+            const cardTitle = document.getElementById('card-title');
+            if (e.target.value) {
+                cardTitle.textContent = e.target.value;
+                cardTitle.className = '';
+            } else {
+                cardTitle.innerHTML = '<span class="placeholder-text">Job Title</span>';
+            }
+        });
+
+        document.getElementById('phone-number').addEventListener('input', function(e) {
+            cardData.phone = e.target.value;
+            const cardPhone = document.getElementById('card-phone');
+            if (e.target.value) {
+                cardPhone.textContent = e.target.value;
+                cardPhone.className = '';
+            } else {
+                cardPhone.innerHTML = '<span class="placeholder-text">Phone Number</span>';
+            }
+        });
+
+        document.getElementById('whatsapp').addEventListener('input', function(e) {
+            cardData.whatsapp = e.target.value;
+            const cardWhatsApp = document.getElementById('card-whatsapp');
+            if (e.target.value) {
+                cardWhatsApp.textContent = e.target.value;
+                cardWhatsApp.className = '';
+            } else {
+                cardWhatsApp.innerHTML = '<span class="placeholder-text">WhatsApp</span>';
+            }
+        });
+
+        document.getElementById('email').addEventListener('input', function(e) {
+            cardData.email = e.target.value;
+            const cardEmail = document.getElementById('card-email');
+            if (e.target.value) {
+                cardEmail.textContent = e.target.value;
+                cardEmail.className = '';
+            } else {
+                cardEmail.innerHTML = '<span class="placeholder-text">Email</span>';
+            }
+        });
+
+        // Action handlers
+        function handleCall() {
+            if (cardData.phone) {
+                // Validate phone number format
+                const cleanPhone = cardData.phone.replace(/[^\d+\-() ]/g, '');
+                if (cleanPhone) {
+                    window.location.href = 'tel:' + cleanPhone;
+                } else {
+                    alert('Invalid phone number format');
+                }
+            } else {
+                alert('Please enter a phone number');
+            }
+        }
+
+        function handleEmail() {
+            if (cardData.email) {
+                // Basic email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailRegex.test(cardData.email)) {
+                    window.location.href = 'mailto:' + encodeURIComponent(cardData.email);
+                } else {
+                    alert('Invalid email address format');
+                }
+            } else {
+                alert('Please enter an email address');
+            }
+        }
+
+        function handleWhatsApp() {
+            if (cardData.whatsapp) {
+                // Remove spaces and special characters except +
+                const cleanNumber = cardData.whatsapp.replace(/[^\d+]/g, '');
+                if (cleanNumber) {
+                    window.open('https://wa.me/' + cleanNumber, '_blank');
+                } else {
+                    alert('Invalid WhatsApp number format');
+                }
+            } else {
+                alert('Please enter a WhatsApp number');
+            }
+        }
+
+        function handleWebsite() {
+            window.open('https://www.hasib.com.sa', '_blank');
+        }
+
+        // vCard download functionality
+        function downloadVCard() {
+            if (!cardData.name || !cardData.email || !cardData.phone) {
+                alert('Please fill in at least Name, Email, and Phone Number to generate vCard');
+                return;
+            }
+
+            try {
+                // Create vCard content with CRLF line endings
+                let vcard = 'BEGIN:VCARD\r\n';
+                vcard += 'VERSION:3.0\r\n';
+                vcard += 'FN:' + cardData.name + '\r\n';
+                
+                // Simplified N field structure
+                const nameParts = cardData.name.trim().split(/\s+/);
+                const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+                const firstName = nameParts.length > 0 ? nameParts.slice(0, -1).join(' ') || nameParts[0] : '';
+                vcard += 'N:' + lastName + ';' + firstName + ';;;\r\n';
+                
+                if (cardData.title) {
+                    vcard += 'TITLE:' + cardData.title + '\r\n';
+                }
+                
+                if (cardData.phone) {
+                    vcard += 'TEL;TYPE=WORK,VOICE:' + cardData.phone + '\r\n';
+                }
+                
+                if (cardData.whatsapp) {
+                    vcard += 'TEL;TYPE=CELL:' + cardData.whatsapp + '\r\n';
+                }
+                
+                if (cardData.email) {
+                    vcard += 'EMAIL;TYPE=INTERNET:' + cardData.email + '\r\n';
+                }
+                
+                vcard += 'URL:https://www.hasib.com.sa\r\n';
+                
+                if (cardData.photo) {
+                    try {
+                        // Convert base64 image to vCard format with error handling
+                        const photoData = cardData.photo.split(',')[1];
+                        const photoTypePart = cardData.photo.split(':')[1].split(';')[0];
+                        const photoType = photoTypePart.split('/')[1] ? photoTypePart.split('/')[1].toUpperCase() : 'JPEG';
+                        vcard += 'PHOTO;ENCODING=b;TYPE=' + photoType + ':' + photoData + '\r\n';
+                    } catch (e) {
+                        console.warn('Could not encode photo for vCard:', e);
+                        // Continue without photo
+                    }
+                }
+                
+                vcard += 'END:VCARD';
+
+                // Create download link with proper error handling
+                const blob = new Blob([vcard], { type: 'text/vcard' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Use name for filename or default
+                const filename = cardData.name ? cardData.name.replace(/\s+/g, '_') : 'contact';
+                link.download = filename + '.vcf';
+                
+                try {
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
+            } catch (e) {
+                alert('Error generating vCard: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>
