@@ -318,9 +318,13 @@
 
                 <div class="form-group">
                     <label for="photo-upload">Photo Upload</label>
-                    <div class="photo-upload" onclick="document.getElementById('photo-input').click()">
+                    <div class="photo-upload" onclick="document.getElementById('photo-input').click()" 
+                         tabindex="0" 
+                         onkeypress="if(event.key==='Enter'||event.key===' ')document.getElementById('photo-input').click()"
+                         role="button"
+                         aria-label="Upload profile photo">
                         <input type="file" id="photo-input" accept="image/*">
-                        <img id="photo-preview" class="photo-preview" alt="Preview">
+                        <img id="photo-preview" class="photo-preview" alt="Profile photo preview">
                         <div class="upload-icon">📷</div>
                         <div class="upload-text">Click to upload photo</div>
                     </div>
@@ -421,6 +425,21 @@
         document.getElementById('photo-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select a valid image file.');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('Image file is too large. Please select an image smaller than 5MB.');
+                    e.target.value = '';
+                    return;
+                }
+                
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const photoPreview = document.getElementById('photo-preview');
@@ -431,6 +450,10 @@
                     cardPhoto.src = event.target.result;
                     cardData.photo = event.target.result;
                 };
+                reader.onerror = function() {
+                    alert('Error reading file. Please try again.');
+                    e.target.value = '';
+                };
                 reader.readAsDataURL(file);
             }
         });
@@ -439,40 +462,68 @@
         document.getElementById('employee-name').addEventListener('input', function(e) {
             cardData.name = e.target.value;
             const cardName = document.getElementById('card-name');
-            cardName.innerHTML = e.target.value || '<span class="placeholder-text">Your Name</span>';
+            if (e.target.value) {
+                cardName.textContent = e.target.value;
+                cardName.className = '';
+            } else {
+                cardName.innerHTML = '<span class="placeholder-text">Your Name</span>';
+            }
         });
 
         document.getElementById('job-title').addEventListener('input', function(e) {
             cardData.title = e.target.value;
             const cardTitle = document.getElementById('card-title');
-            cardTitle.innerHTML = e.target.value || '<span class="placeholder-text">Job Title</span>';
+            if (e.target.value) {
+                cardTitle.textContent = e.target.value;
+                cardTitle.className = '';
+            } else {
+                cardTitle.innerHTML = '<span class="placeholder-text">Job Title</span>';
+            }
         });
 
         document.getElementById('phone-number').addEventListener('input', function(e) {
             cardData.phone = e.target.value;
             const cardPhone = document.getElementById('card-phone');
-            cardPhone.innerHTML = e.target.value || '<span class="placeholder-text">Phone Number</span>';
-            cardPhone.className = e.target.value ? '' : 'placeholder-text';
+            if (e.target.value) {
+                cardPhone.textContent = e.target.value;
+                cardPhone.className = '';
+            } else {
+                cardPhone.innerHTML = '<span class="placeholder-text">Phone Number</span>';
+            }
         });
 
         document.getElementById('whatsapp').addEventListener('input', function(e) {
             cardData.whatsapp = e.target.value;
             const cardWhatsApp = document.getElementById('card-whatsapp');
-            cardWhatsApp.innerHTML = e.target.value || '<span class="placeholder-text">WhatsApp</span>';
-            cardWhatsApp.className = e.target.value ? '' : 'placeholder-text';
+            if (e.target.value) {
+                cardWhatsApp.textContent = e.target.value;
+                cardWhatsApp.className = '';
+            } else {
+                cardWhatsApp.innerHTML = '<span class="placeholder-text">WhatsApp</span>';
+            }
         });
 
         document.getElementById('email').addEventListener('input', function(e) {
             cardData.email = e.target.value;
             const cardEmail = document.getElementById('card-email');
-            cardEmail.innerHTML = e.target.value || '<span class="placeholder-text">Email</span>';
-            cardEmail.className = e.target.value ? '' : 'placeholder-text';
+            if (e.target.value) {
+                cardEmail.textContent = e.target.value;
+                cardEmail.className = '';
+            } else {
+                cardEmail.innerHTML = '<span class="placeholder-text">Email</span>';
+            }
         });
 
         // Action handlers
         function handleCall() {
             if (cardData.phone) {
-                window.location.href = 'tel:' + cardData.phone;
+                // Validate phone number format
+                const cleanPhone = cardData.phone.replace(/[^\d+\-() ]/g, '');
+                if (cleanPhone) {
+                    window.location.href = 'tel:' + cleanPhone;
+                } else {
+                    alert('Invalid phone number format');
+                }
             } else {
                 alert('Please enter a phone number');
             }
@@ -480,7 +531,13 @@
 
         function handleEmail() {
             if (cardData.email) {
-                window.location.href = 'mailto:' + cardData.email;
+                // Basic email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailRegex.test(cardData.email)) {
+                    window.location.href = 'mailto:' + encodeURIComponent(cardData.email);
+                } else {
+                    alert('Invalid email address format');
+                }
             } else {
                 alert('Please enter an email address');
             }
@@ -490,7 +547,11 @@
             if (cardData.whatsapp) {
                 // Remove spaces and special characters except +
                 const cleanNumber = cardData.whatsapp.replace(/[^\d+]/g, '');
-                window.open('https://wa.me/' + cleanNumber, '_blank');
+                if (cleanNumber) {
+                    window.open('https://wa.me/' + cleanNumber, '_blank');
+                } else {
+                    alert('Invalid WhatsApp number format');
+                }
             } else {
                 alert('Please enter a WhatsApp number');
             }
@@ -507,53 +568,71 @@
                 return;
             }
 
-            // Create vCard content
-            let vcard = 'BEGIN:VCARD\n';
-            vcard += 'VERSION:3.0\n';
-            vcard += 'FN:' + cardData.name + '\n';
-            vcard += 'N:' + cardData.name.split(' ').reverse().join(';') + ';;;\n';
-            
-            if (cardData.title) {
-                vcard += 'TITLE:' + cardData.title + '\n';
-            }
-            
-            if (cardData.phone) {
-                vcard += 'TEL;TYPE=WORK,VOICE:' + cardData.phone + '\n';
-            }
-            
-            if (cardData.whatsapp) {
-                vcard += 'TEL;TYPE=CELL:' + cardData.whatsapp + '\n';
-            }
-            
-            if (cardData.email) {
-                vcard += 'EMAIL;TYPE=INTERNET:' + cardData.email + '\n';
-            }
-            
-            vcard += 'URL:https://www.hasib.com.sa\n';
-            
-            if (cardData.photo) {
-                // Convert base64 image to vCard format
-                const photoData = cardData.photo.split(',')[1];
-                const photoType = cardData.photo.split(':')[1].split(';')[0].split('/')[1].toUpperCase();
-                vcard += 'PHOTO;ENCODING=b;TYPE=' + photoType + ':' + photoData + '\n';
-            }
-            
-            vcard += 'END:VCARD';
+            try {
+                // Create vCard content with CRLF line endings
+                let vcard = 'BEGIN:VCARD\r\n';
+                vcard += 'VERSION:3.0\r\n';
+                vcard += 'FN:' + cardData.name + '\r\n';
+                
+                // Simplified N field structure
+                const nameParts = cardData.name.trim().split(/\s+/);
+                const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+                const firstName = nameParts.length > 0 ? nameParts.slice(0, -1).join(' ') || nameParts[0] : '';
+                vcard += 'N:' + lastName + ';' + firstName + ';;;\r\n';
+                
+                if (cardData.title) {
+                    vcard += 'TITLE:' + cardData.title + '\r\n';
+                }
+                
+                if (cardData.phone) {
+                    vcard += 'TEL;TYPE=WORK,VOICE:' + cardData.phone + '\r\n';
+                }
+                
+                if (cardData.whatsapp) {
+                    vcard += 'TEL;TYPE=CELL:' + cardData.whatsapp + '\r\n';
+                }
+                
+                if (cardData.email) {
+                    vcard += 'EMAIL;TYPE=INTERNET:' + cardData.email + '\r\n';
+                }
+                
+                vcard += 'URL:https://www.hasib.com.sa\r\n';
+                
+                if (cardData.photo) {
+                    try {
+                        // Convert base64 image to vCard format with error handling
+                        const photoData = cardData.photo.split(',')[1];
+                        const photoTypePart = cardData.photo.split(':')[1].split(';')[0];
+                        const photoType = photoTypePart.split('/')[1] ? photoTypePart.split('/')[1].toUpperCase() : 'JPEG';
+                        vcard += 'PHOTO;ENCODING=b;TYPE=' + photoType + ':' + photoData + '\r\n';
+                    } catch (e) {
+                        console.warn('Could not encode photo for vCard:', e);
+                        // Continue without photo
+                    }
+                }
+                
+                vcard += 'END:VCARD';
 
-            // Create download link
-            const blob = new Blob([vcard], { type: 'text/vcard' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            
-            // Use name for filename or default
-            const filename = cardData.name ? cardData.name.replace(/\s+/g, '_') : 'contact';
-            link.download = filename + '.vcf';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+                // Create download link with proper error handling
+                const blob = new Blob([vcard], { type: 'text/vcard' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Use name for filename or default
+                const filename = cardData.name ? cardData.name.replace(/\s+/g, '_') : 'contact';
+                link.download = filename + '.vcf';
+                
+                try {
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
+            } catch (e) {
+                alert('Error generating vCard: ' + e.message);
+            }
         }
     </script>
 </body>
